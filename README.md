@@ -25,6 +25,7 @@
   - [CircleCI](#circleci)
 - [📦 Options](#options)
   - [--configuration](#--configuration)
+  - [--no-build](#--no-build)
   - [--package-version](#--package-version)
   - [--tag](#--tag)
   - [--access](#--access)
@@ -115,6 +116,19 @@ jobs:
 A named build target, as specified in the `configurations` section of `angular.json`.
 Each named target is accompanied by a configuration of option defaults for that target.
 Same as `ng build --configuration=XXX`.
+
+#### --no-build
+ * __optional__
+ * Default: `false` (string)
+ * Example:
+    * `ng deploy` – Angular Library is build in before the deployment
+    * `ng deploy --no-build` – Angular Library is NOT build
+
+Skip build process during deployment.
+This can be used when you are sure that you haven't changed anything and want to deploy with the latest artifact.
+This command causes the `--configuration` setting to have no effect.
+
+> **This is a proposal from [RFC #1](https://github.com/angular-schule/ngx-deploy-starter/issues/1).**
 
 #### --package-version
 
