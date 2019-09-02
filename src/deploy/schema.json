@@ -1,7 +1,7 @@
 {
   "id": "Schema",
   "title": "schema",
-  "description": "Deployment of Angular CLI applications to the file system",
+  "description": "Deployment/Publishment of Angular CLI applications to NPM",
   "properties": {
     "baseHref": {
       "type": "string",

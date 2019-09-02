@@ -12,28 +12,28 @@ The groundwork of this starter was provided by Minko Gechev's [ngx-gh project](h
 This project has the following purposes:
 
 1. To promote the adoption of `ng deploy`.
-2. To clarify various questions and to standardise the experience of the various builders.  
+2. To clarify various questions and to standardise the experience of the various builders.
 
 We hope for an inspiring discussion, pull requests and questions.
 
-**If you don't know `ng deploy` yet, learn more about this command here:  
-[👉 Blogpost: All you need to know about `ng deploy`](https://angular.schule/blog/2019-08-ng-deploy)**  
+**If you don't know `ng deploy` yet, learn more about this command here:
+[👉 Blogpost: All you need to know about `ng deploy`](https://angular.schule/blog/2019-08-ng-deploy)**
 
 ## Essential considerations
 
-There are still differences between the existing builders. 
+There are still differences between the existing builders.
 Let's find some rules that everyone agrees with. Here are two proposals.
 
 ### 1. A deployment builder must always compile the project before the deployment
 
 To reduce the chances to deploy corrupted assets, it's important to build the app right before deploying it. ([source](https://github.com/angular-schule/website-articles/pull/3#discussion_r315802100))
 
-**Current state:**  
+**Current state:**
 Currently there are existing deployment builders that only build in production mode.
 This might be not enough.
 There is also the approach not to perform the build step at all.
 
-**Our suggestion:**  
+**Our suggestion:**
 By default, a deployment builder **shall** compile in `production` mode, but it **should** be possible to override the default configuration using the option `--configuration`.
 
 Discussion: https://github.com/angular-schule/ngx-deploy-starter/issues/1
@@ -43,7 +43,7 @@ Discussion: https://github.com/angular-schule/ngx-deploy-starter/issues/1
 To make it easier for the end user to get started, a deployment builder **should** ask for all the mandatory questions immediately after the `ng add`.
 The data should be persisted in the `angular.json` file.
 
-**Note:**  
+**Note:**
 This feature is not implemented for this starter yet, but we are looking forward to your support.
 
 Discussion: https://github.com/angular-schule/ngx-deploy-starter/issues/2

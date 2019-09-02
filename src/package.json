@@ -4,7 +4,7 @@
   "description": "Publish your angular packages to npm by just run `npm deploy your-packages`",
   "main": "index.js",
   "scripts": {
-    "build": "rimraf dist && json2ts deploy/schema.json > deploy/schema.d.ts && tsc && copyfiles README.md builders.json collection.json package.json ngx-deploy-starter deploy/schema.json dist",
+    "build": "rimraf dist && json2ts deploy/schema.json > deploy/schema.d.ts && tsc && copyfiles README.md builders.json collection.json package.json ngx-deploy-npm deploy/schema.json dist",
     "test": "jest"
   },
   "schematics": "./collection.json",
