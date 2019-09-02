@@ -1,4 +1,8 @@
-import { BuilderContext, BuilderOutput, createBuilder } from '@angular-devkit/architect';
+import {
+  BuilderContext,
+  BuilderOutput,
+  createBuilder
+} from '@angular-devkit/architect';
 import { asWindowsPath, experimental, normalize } from '@angular-devkit/core';
 import { NodeJsSyncHost } from '@angular-devkit/core/node';
 import os from 'os';
@@ -11,10 +15,7 @@ import { Schema } from './schema';
 // Call the createBuilder() function to create a builder. This mirrors
 // createJobHandler() but add typings specific to Architect Builders.
 export default createBuilder<any>(
-  async (
-    options: Schema,
-    context: BuilderContext
-  ): Promise<BuilderOutput> => {
+  async (options: Schema, context: BuilderContext): Promise<BuilderOutput> => {
     // The project root is added to a BuilderContext.
     const root = normalize(context.workspaceRoot);
     const workspace = new experimental.workspace.Workspace(
@@ -31,19 +32,14 @@ export default createBuilder<any>(
 
     const targets = workspace.getProjectTargets(context.target.project);
 
-    if (
-      !targets ||
-      !targets.build ||
-      !targets.build.options ||
-      !targets.build.options.outputPath
-    ) {
-      throw new Error('Cannot find the project output directory');
-    }
+    const outputPath = await getLibraryOutputPath(targets);
 
     // normalizes pathes don't work with all native functions
     // as a workaround, you can use the following 2 lines
     const isWin = os.platform() === 'win32';
-    const workspaceRoot = !isWin ? workspace.root : asWindowsPath(workspace.root);
+    const workspaceRoot = !isWin
+      ? workspace.root
+      : asWindowsPath(workspace.root);
     // if this is not necessary, use this:
     // const workspaceRoot =  workspace.root;
 
@@ -51,7 +47,7 @@ export default createBuilder<any>(
       await deploy(
         engine,
         context,
-        path.join(workspaceRoot, targets.build.options.outputPath),
+        path.join(workspaceRoot, outputPath),
         options
       );
     } catch (e) {
@@ -63,3 +59,35 @@ export default createBuilder<any>(
     return { success: true };
   }
 );
+
+const fs = require('fs');
+function readFileAsync<T>(path: string): Promise<T> {
+  return new Promise((res, rej) => {
+    fs.readFile(path, 'utf8', function(err, contents) {
+      if (err) rej(err);
+
+      res(contents);
+    });
+  });
+}
+
+async function getLibraryOutputPath(
+  targets: experimental.workspace.WorkspaceTool
+) {
+  const ngPackagePath = targets.build.options.project;
+
+  try {
+    const dataStr = await readFileAsync<string>(ngPackagePath);
+    const data = JSON.parse(dataStr);
+
+    const pathWithoutFile = ngPackagePath
+      .split('/')
+      .slice(0, -1)
+      .join('/');
+    const fullPath = pathWithoutFile + data.dest;
+
+    return fullPath;
+  } catch (err) {
+    throw new Error('An error occurs reading the ng-package.json');
+  }
+}
