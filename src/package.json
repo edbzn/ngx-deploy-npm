@@ -1,7 +1,7 @@
 {
-  "name": "@angular-schule/ngx-deploy-starter",
+  "name": "ngx-deploy-npm",
   "version": "0.0.1",
-  "description": "Deployment from the Angular CLI to the file system. This is a sample project that helps you to implement your own deployment builder (`ng deploy`) for the Angular CLI.",
+  "description": "Publish your angular packages to npm by just run `npm deploy your-packages`",
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && json2ts deploy/schema.json > deploy/schema.d.ts && tsc && copyfiles README.md builders.json collection.json package.json ngx-deploy-starter deploy/schema.json dist",
@@ -11,7 +11,7 @@
   "builders": "./builders.json",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/angular-schule/ngx-deploy-starter.git"
+    "url": "git+https://github.com/bikecoders/ngx-deploy-starter.git"
   },
   "keywords": [
     "angular",
@@ -19,20 +19,22 @@
     "angular-cli",
     "deploy",
     "ng deploy",
-    "ng-deploy"
+    "ng-deploy",
+    "npm deploy",
+    "npm publish"
   ],
   "author": {
-    "name": "Johannes Hoppe",
-    "email": "johannes.hoppe@haushoppe-its.de"
+    "name": "Diego Juliao",
+    "email": "dianjuar@gmail.com"
   },
   "contributors": [
-    "Minko Gechev <mgechev@gmail.com>"
+    "Yossely Mendoza <yossely7@gmail.com>"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/angular-schule/ngx-deploy-starter/issues"
+    "url": "https://github.com/bikecoders/ngx-deploy-starter/issues"
   },
-  "homepage": "https://github.com/angular-schule/ngx-deploy-starter/#readme",
+  "homepage": "https://github.com/bikecoders/ngx-deploy-starter/#readme",
   "devDependencies": {
     "@angular-devkit/architect": "^0.803.0-next.0",
     "@angular-devkit/core": "^8.3.0-next.0",
