@@ -3,40 +3,44 @@ import { json, logging } from '@angular-devkit/core';
 
 import { Schema } from './schema';
 
-
 export default async function deploy(
-  engine: { run: (dir: string, options: Schema, logger: logging.LoggerApi) => Promise<void> },
+  engine: {
+    run: (
+      dir: string,
+      options: Schema,
+      logger: logging.LoggerApi
+    ) => Promise<void>;
+  },
   context: BuilderContext,
   projectRoot: string,
   options: Schema
 ) {
-
   if (options.noBuild) {
     context.logger.info(`📦 Skipping build`);
   } else {
-
     if (!context.target) {
       throw new Error('Cannot execute the build target');
     }
 
-    const configuration = options.configuration ? options.configuration : 'production'
-    const overrides = {
-      ...(options.baseHref && {baseHref: options.baseHref})
-    };
+    const configuration = options.configuration
+      ? options.configuration
+      : 'production';
 
-    context.logger.info(`📦 Building "${ context.target.project }". Configuration: "${ configuration }".${ options.baseHref ? ' Your base-href: "' + options.baseHref + '"' : '' }`);
+    context.logger.info(
+      `📦 Building "${context.target.project}". Configuration: "${configuration}".`
+    );
 
     const build = await context.scheduleTarget({
       target: 'build',
       project: context.target.project,
       configuration
-    }, overrides as json.JsonObject);
+    });
     await build.result;
   }
 
   await engine.run(
     projectRoot,
     options,
-    context.logger as unknown as logging.LoggerApi
+    (context.logger as unknown) as logging.LoggerApi
   );
 }

@@ -1,6 +1,8 @@
 import { SchematicsException, Tree } from '@angular-devkit/schematics';
 import { experimental, JsonParseMode, parseJson } from '@angular-devkit/core';
 
+import { npmAccess } from './engine/defaults';
+
 function getWorkspace(
   host: Tree
 ): { path: string; workspace: experimental.workspace.WorkspaceSchema } {
@@ -53,7 +55,9 @@ export const ngAdd = ({ project: DeployOptions }) => (
     if (lib.architect) {
       lib.architect['deploy'] = {
         builder: 'ngx-deploy-npm:deploy',
-        options: {}
+        options: {
+          access: npmAccess.public
+        }
       };
     }
   });

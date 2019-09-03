@@ -80,11 +80,7 @@ async function getLibraryOutputPath(
     const dataStr = await readFileAsync<string>(ngPackagePath);
     const data = JSON.parse(dataStr);
 
-    const pathWithoutFile = ngPackagePath
-      .split('/')
-      .slice(0, -1)
-      .join('/');
-    const fullPath = pathWithoutFile + data.dest;
+    const fullPath = (data.dest as string).replace(/\.\.\//g, '');
 
     return fullPath;
   } catch (err) {
