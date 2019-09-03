@@ -1,75 +1,169 @@
-# @angular-schule/ngx-deploy-starter 🚀
+# ngx-deploy-npm 🚀
+
 [![NPM version][npm-image]][npm-url]
 [![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg?color=blue&style=flat-square)](http://opensource.org/licenses/MIT)
 
-![Banner](docs/ng-deploy-starter-project.jpg)
+### **Deploy your Angular Package to NPM directly from the Angular CLI! 🚀**
 
-## About
+**Table of contents:**
 
-This is a sample project that helps you to implement your own __deployment builder__ (`ng deploy`) for the Angular CLI.
-The groundwork of this starter was provided by Minko Gechev's [ngx-gh project](https://github.com/mgechev/ngx-gh).
+- [⚠️ Prerequisites](#prerequisites)
+- [🚀 Quick Start (local development)](#quick-start)
+- [🚀 Continuous Delivery](#continuous-delivery)
+- [📦 Options](#options)
+  - [--configuration](#--configuration)
+  - [--tag](#--tag)
+  - [--access](#--access)
+  - [--otp](#--otp)
+  - [--dry-run](#--dry-run)
+- [📁 Configuration File](#configuration-file)
+- [🧐 Essential considerations](#essential-considerations)
+- [🏁 Next milestones](#next-milestones)
+- [License](#license)
+- [🚀 Powered By ngx-deploy-starter](#-powered-by-ngx-deploy-starter)
 
-This project has the following purposes:
+---
 
-1. To promote the adoption of `ng deploy`.
-2. To clarify various questions and to standardise the experience of the various builders.
+## ⚠️ Prerequisites <a name="prerequisites"></a>
 
-We hope for an inspiring discussion, pull requests and questions.
+This command has the following prerequisites:
 
-**If you don't know `ng deploy` yet, learn more about this command here:
-[👉 Blogpost: All you need to know about `ng deploy`](https://angular.schule/blog/2019-08-ng-deploy)**
+- Angular project created via [Angular CLI](https://github.com/angular/angular-cli) v8.3.0 or greater (execute `ng update @angular/cli @angular/core` to upgrade your project if necessary)
 
-## Essential considerations
+## 🚀 Quick Start (local development) <a name="quick-start"></a>
 
-There are still differences between the existing builders.
-Let's find some rules that everyone agrees with. Here are two proposals.
+This quick start assumes that you already an existing Angular project with a publishable package created
 
-### 1. A deployment builder must always compile the project before the deployment
+1. Add `ngx-deploy-npm` to your project. It will configure all your libraries present in the project
 
-To reduce the chances to deploy corrupted assets, it's important to build the app right before deploying it. ([source](https://github.com/angular-schule/website-articles/pull/3#discussion_r315802100))
+   ```sh
+   ng add ngx-deploy-npm
+   ```
 
-**Current state:**
-Currently there are existing deployment builders that only build in production mode.
-This might be not enough.
-There is also the approach not to perform the build step at all.
+2. Deploy your library to NPM with all default settings. Your library will be automatically built in production mode.
 
-**Our suggestion:**
-By default, a deployment builder **shall** compile in `production` mode, but it **should** be possible to override the default configuration using the option `--configuration`.
+   ```sh
+   ng deploy your-library
+   ```
 
-Discussion: https://github.com/angular-schule/ngx-deploy-starter/issues/1
+3. Your library should be published on npm. So go and check npm.js
 
-### 2. A deployment builder should have an interactive prompt after the "ng add".
+## 🚀 Continuous Delivery <a name="continuous-delivery"></a>
 
-To make it easier for the end user to get started, a deployment builder **should** ask for all the mandatory questions immediately after the `ng add`.
-The data should be persisted in the `angular.json` file.
+**🚧 coming soon 🚧**
 
-**Note:**
-This feature is not implemented for this starter yet, but we are looking forward to your support.
+## 📦 Options <a name="options"></a>
 
-Discussion: https://github.com/angular-schule/ngx-deploy-starter/issues/2
+#### --configuration
 
-### 3. More to come
+- **optional**
+- Alias: `-c`
+- Default: `production` (string)
+- Example:
+  - `ng deploy` – Angular project is build in production mode
+  - `ng deploy --configuration=test` – Angular project is using the configuration `test` (this configuration must exist in the `angular.json` file)
 
-What's bothers you about this example?
-We appreciate your [feedback](https://github.com/angular-schule/ngx-deploy-starter/issues)!
+A named build target, as specified in the `configurations` section of `angular.json`.
+Each named target is accompanied by a configuration of option defaults for that target.
+Same as `ng build --configuration=XXX`.
 
+#### --tag
 
-## How to make your own deploy builder
+- **optional**
+- Default: `latest` (string)
+- Example:
+  - `ng deploy --tag alpha` – Your package will be available for download using that tag, `npm install your-package@alpha` useful for RC versions, alpha, betas.
 
-1. fork this repository
-2. adjust the `package.json`
-3. search and replace for the string `@angular-schule/ngx-deploy-starter` and `ngx-deploy-starter` and choose your own name.
-4. search and replace for the string `to the file system` and name your deploy target.
-5. add your deployment code to `src/engine/engine.ts`, take care of the tests
-6. follow the instructions from the [contributors README](docs/README_contributors.md) for build, test and publishing.
+Registers the published package with the given tag, such that `npm install @` will install this version. By default, `npm publish` updates and `npm install` installs the `latest` tag. See [`npm-dist-tag`](https://docs.npmjs.com/cli/dist-tag) for details about tags.
 
+#### --access
 
-You are free to customise this project according to your needs.
-Please keep the spirit of Open Source alive and use the MIT or a compatible license.
+- Default: `public` (string)
+- Example:
+  - `ng deploy --access public`
 
-## License
+Tells the registry whether this package should be published as public or restricted. Only applies to scoped packages, which default to restricted. If you don’t have a paid account, you must publish with --access public to publish scoped packages.
+
+#### --otp
+
+- **optional**
+- Default: `public` (string)
+- Example:
+  - `ng deploy --otp TOKEN`
+
+If you have two-factor authentication enabled in auth-and-writes mode then you can provide a code from your authenticator with this.
+
+#### --dry-run
+
+- **optional**
+- Default: `false` (boolean)
+- Example:
+  - `ng deploy --dry-run`
+
+For testing: Run through without making any changes. Execute with --dry-run and nothing will happen. A list of options will be printed
+
+## 📁 Configuration File <a name="configuration-file"></a>
+
+To avoid all these command-line cmd options, you can write down your configuration in the `angular.json` file in the `options` attribute of your deploy project's architect. Just change the kebab-case to lower camel case. This is the notation of all options in lower camel case:
+
+- access
+- configuration
+- dryRun
+- otp
+- tag
+
+A list of all available options is also available [here](https://github.com/bikecoders/ngx-deploy-starter/blob/master/src/deploy/schema.json).
+
+Example:
+
+```sh
+ng deploy your-library --tag alpha --access public --dry-run
+```
+
+becomes
+
+```json
+"deploy": {
+  "builder": "ngx-deploy-npm:deploy",
+  "options": {
+    "tag": "alpha",
+    "access": "public",
+    "dryRun": "true"
+  }
+}
+```
+
+And just run `ng deploy` 😄.
+
+> ℹ️ You can always use the [--dry-run](#dry-run) option to verify if your configuration is right.
+
+## 🧐 Essential considerations <a name="essential-considerations"></a>
+
+This deployer do not bumps or creates a new version of the package, it just build the **package/library**, take the package.json as it and **publish** it.
+
+**You must take care about the version by yourself. Maybe using a script that sets the version**
+
+## 🏁 Next milestones <a name="next-milestones"></a>
+
+We are looking forward to the following features:
+
+- Implement Continuous Everything:
+  - Integration
+  - Inspection
+  - Delivery
+- Specify which library add the deployer on the `ng add`
+- Compatibility with [Nx](https://nx.dev)
+- CI instructions
+
+Your feature that's not on the list yet?
+
+We look forward to any help. PRs are welcome! 😃
+
+## License <a name="license"></a>
+
 Code released under the [MIT license](LICENSE).
 
+## 🚀 Powered By [ngx-deploy-starter](https://github.com/angular-schule/ngx-deploy-starter)
 
-[npm-url]: https://www.npmjs.com/package/@angular-schule/ngx-deploy-starter
-[npm-image]: https://badge.fury.io/js/%40angular-schule%2Fngx-deploy-starter.svg
+[npm-url]: https://www.npmjs.com/package/ngx-deploy-npm
+[npm-image]: https://badge.fury.io/js/ngx-deploy-npm.svg
