@@ -112,7 +112,7 @@ To avoid all these command-line cmd options, you can write down your configurati
 - otp
 - tag
 
-A list of all available options is also available [here](https://github.com/bikecoders/ngx-deploy-starter/blob/master/src/deploy/schema.json).
+A list of all available options is also available [here](https://github.com/bikecoders/ngx-deploy-npm/blob/master/src/deploy/schema.json).
 
 Example:
 
@@ -139,6 +139,12 @@ And just run `ng deploy` 😄.
 
 ## 🧐 Essential considerations <a name="essential-considerations"></a>
 
+### Readme and Licence
+
+The licence and the readme must be in the root of the library. They are being copyed at the moment of deployment
+
+### Version bumping
+
 This deployer do not bumps or creates a new version of the package, it just build the **package/library**, take the package.json as it and **publish** it.
 
 **You must take care about the version by yourself. Maybe using a script that sets the version**
@@ -153,7 +159,10 @@ We are looking forward to the following features:
   - Delivery
 - Specify which library add the deployer on the `ng add`
 - Compatibility with [Nx](https://nx.dev)
-- CI instructions
+- Continuous Delivery Documentation
+- Add all the RFC proposals of [ngx-deploy-starter](https://github.com/angular-schule/ngx-deploy-starter)
+- ChangeLog Compatibility
+- Custom Readme and Licence Paths
 
 Your feature that's not on the list yet?
 

@@ -1,6 +1,6 @@
 {
   "name": "ngx-deploy-npm",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Publish your angular packages to npm by just run `npm deploy your-packages`",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "builders": "./builders.json",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bikecoders/ngx-deploy-starter.git"
+    "url": "git+https://github.com/bikecoders/ngx-deploy-npm.git"
   },
   "keywords": [
     "angular",
@@ -33,9 +33,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bikecoders/ngx-deploy-starter/issues"
+    "url": "https://github.com/bikecoders/ngx-deploy-npm/issues"
   },
-  "homepage": "https://github.com/bikecoders/ngx-deploy-starter/#readme",
+  "homepage": "https://github.com/bikecoders/ngx-deploy-npm/#readme",
   "devDependencies": {
     "@angular-devkit/architect": "^0.803.0-next.0",
     "@angular-devkit/core": "^8.3.0-next.0",
