@@ -1,5 +1,5 @@
-import { BuilderContext } from '@angular-devkit/architect';
-import { json, logging } from '@angular-devkit/core';
+import { BuilderContext, Target } from '@angular-devkit/architect';
+import { logging } from '@angular-devkit/core';
 
 import { Schema } from './schema';
 
@@ -24,17 +24,25 @@ export default async function deploy(
 
     const configuration = options.configuration
       ? options.configuration
-      : 'production';
+      : undefined;
 
     context.logger.info(
-      `📦 Building "${context.target.project}". Configuration: "${configuration}".`
+      `📦 Building "${context.target.project}". ${
+        configuration ? `Configuration "${configuration}"` : ''
+      }`
     );
 
-    const build = await context.scheduleTarget({
+    const target = {
       target: 'build',
-      project: context.target.project,
-      configuration
-    });
+      project: context.target.project
+    } as Target;
+
+    // Set the configuration if set on the options
+    if (configuration) {
+      target.configuration = configuration;
+    }
+
+    const build = await context.scheduleTarget(target);
     await build.result;
   }
 

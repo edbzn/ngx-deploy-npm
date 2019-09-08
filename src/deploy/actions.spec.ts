@@ -15,18 +15,35 @@ const PROJECT = 'pirojok-project';
 describe('Deploy Angular apps', () => {
   beforeEach(() => initMocks());
 
-  xit('should invoke the builder', async () => {
-    const spy = spyOn(context, 'scheduleTarget').and.callThrough();
-    await deploy(mockEngine, context, 'host', {});
+  describe('Builder', () => {
+    let spy: jest.SpyInstance;
 
-    expect(spy).toHaveBeenCalledWith(
-      {
+    beforeEach(() => {
+      spy = jest.spyOn(context, 'scheduleTarget');
+    });
+
+    it('should invoke the builder', async () => {
+      await deploy(mockEngine, context, 'host', {});
+
+      expect(spy).toHaveBeenCalledWith({
         target: 'build',
-        configuration: 'production',
         project: PROJECT
-      },
-      {}
-    );
+      });
+    });
+
+    it('should invoke the builder with the right configuration', async () => {
+      const customConf = 'my-custom-conf';
+
+      await deploy(mockEngine, context, 'host', {
+        configuration: customConf
+      });
+
+      expect(spy).toHaveBeenCalledWith({
+        target: 'build',
+        project: PROJECT,
+        configuration: customConf
+      });
+    });
   });
 
   it('should invoke engine.run', async () => {
