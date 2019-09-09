@@ -22,9 +22,7 @@ export default async function deploy(
       throw new Error('Cannot execute the build target');
     }
 
-    const configuration = options.configuration
-      ? options.configuration
-      : undefined;
+    const configuration = options.configuration;
 
     context.logger.info(
       `📦 Building "${context.target.project}". ${
