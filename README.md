@@ -5,11 +5,16 @@
 
 ### **Deploy your Angular Package to NPM directly from the Angular CLI! 🚀**
 
+![Cover Image](docs/cover.png)
+
+---
+
 **Table of contents:**
 
 - [⚠️ Prerequisites](#prerequisites)
 - [🚀 Quick Start (local development)](#quick-start)
 - [🚀 Continuous Delivery](#continuous-delivery)
+  - [CircleCI](#circleci)
 - [📦 Options](#options)
   - [--configuration](#--configuration)
   - [--tag](#--tag)
@@ -32,7 +37,7 @@ This command has the following prerequisites:
 
 ## 🚀 Quick Start (local development) <a name="quick-start"></a>
 
-This quick start assumes that you already an existing Angular project with a publishable package created
+This quick start assumes that you already an existing Angular project with a publishable package created and you already are logged in in npm using `npm login`
 
 1. Add `ngx-deploy-npm` to your project. It will configure all your libraries present in the project
 
@@ -50,7 +55,43 @@ This quick start assumes that you already an existing Angular project with a pub
 
 ## 🚀 Continuous Delivery <a name="continuous-delivery"></a>
 
-**🚧 coming soon 🚧**
+Independently of the CI/CD that you are using you must create an NPM token. To do so, you have two methods
+
+- Via [NPM web page](https://docs.npmjs.com/creating-and-viewing-authentication-tokens)
+- Using [`npm token create`](https://docs.npmjs.com/cli/token.html)
+
+### [CircleCI](http://circleci.com)
+
+1. **Set the env variable**
+   - On your project setting ser the env variable. Let's call it `NPM_TOKEN`
+2. **Indicate how to find the token**
+   - Before publishing, we must indicate to npm how to find that token, do it by creating a step with `run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > YOUR_REPO_DIRECTORY/.npmrc`
+   - Replace `YOUR_REPO_DIRECTORY` for the path of your project, commonly is `/home/circleci/repo`
+3. **(Optional) check that you are logged**
+   - Creating a step with `run: npm whoami`
+   - The output should be the username of your npm account
+4. **Deploy your package**
+   - Create a step with `run: npx ng deploy YOUR_LIBRARY`
+   - **NOTE:** You may want to execute an script that execute some pre steps before publishing and inside that script execute `ng deploy YOUR_LIBRARY`. If you want to make that script on JavaScript and put it on the package.json, **execute it using `npm` not with yarn**, there is an [issue](https://github.com/yarnpkg/yarn/issues/5683) associated with that
+5. Enjoy your just released package 🎉📦
+
+The job full example is
+
+```yml
+# .circleci/config.yml
+jobs:
+  init-deploy:
+    executor: my-executor
+    steps:
+      - attach_workspace:
+          at: /home/circleci/repo/
+      # Set NPM token to be able to publish
+      - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > /home/circleci/repo/.npmrc
+      - run: npm whoami
+      - run: ngx ng deploy YOUR_PACKAGE
+```
+
+###### You can check the steps suggested in the [CircleCI's guide](https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/)
 
 ## 📦 Options <a name="options"></a>
 
@@ -141,7 +182,7 @@ And just run `ng deploy` 😄.
 
 ### Readme and Licence
 
-The licence and the readme must be in the root of the library. They are being copyed at the moment of deployment
+The licence and the readme must be in the root of the library. They are being copied at the moment of deployment
 
 ### Version bumping
 
