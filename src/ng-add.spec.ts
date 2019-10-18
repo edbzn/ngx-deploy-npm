@@ -1,231 +1,179 @@
 import { Tree } from '@angular-devkit/schematics';
+import { experimental } from '@angular-devkit/core';
+
 import { ngAdd } from './ng-add';
 
-const LIBRARY_NAME = 'pie-ka-chu';
-const LIBRARY_ROOT = 'pirojok';
-
-const OTHER_LIBRARY_NAME = 'pi-catch-you';
-
 describe('ng-add', () => {
+  let originalAngularJSON: experimental.workspace.WorkspaceSchema;
+  let expectedAngularJSON: experimental.workspace.WorkspaceSchema;
+
+  beforeEach(() => {
+    originalAngularJSON = {
+      version: 1,
+      projects: {
+        testing: {
+          projectType: 'application',
+          schematics: {
+            '@nrwl/angular:component': {
+              style: 'scss'
+            }
+          },
+          root: 'apps/testing',
+          sourceRoot: 'apps/testing/src',
+          prefix: 'myworkspace',
+          architect: {
+            build: {
+              a: 'a',
+              b: 'b'
+            }
+          }
+        },
+        publishable: {
+          projectType: 'library',
+          root: 'libs/publishable',
+          sourceRoot: 'libs/publishable/src',
+          prefix: 'myworkspace',
+          architect: {
+            build: {
+              a: 'a',
+              b: 'b'
+            }
+          },
+          schematics: {}
+        },
+        publishable2: {
+          projectType: 'library',
+          root: 'libs/publishable',
+          sourceRoot: 'libs/publishable/src',
+          prefix: 'myworkspace',
+          architect: {
+            build: {
+              a: 'a',
+              b: 'b'
+            }
+          },
+          schematics: {}
+        },
+        'non-publishable': {
+          projectType: 'library',
+          root: 'libs/non-publishable',
+          sourceRoot: 'libs/non-publishable/src',
+          prefix: 'myworkspace',
+          architect: {
+            lint: {
+              a: 'a',
+              b: 'b'
+            }
+          },
+          schematics: {}
+        },
+        'non-publishable2': {
+          projectType: 'library',
+          root: 'libs/non-publishable',
+          sourceRoot: 'libs/non-publishable/src',
+          prefix: 'myworkspace',
+          architect: {
+            lint: {
+              a: 'a',
+              b: 'b'
+            }
+          },
+          schematics: {}
+        }
+      },
+      defaultProject: 'testing'
+    };
+
+    expectedAngularJSON = JSON.parse(JSON.stringify(originalAngularJSON));
+
+    Object.keys(expectedAngularJSON.projects)
+      .map(projectKey => expectedAngularJSON.projects[projectKey])
+      .filter(project => project.projectType === 'library')
+      .forEach(project => {
+        if (project.architect) {
+          project.architect.deploy = {
+            builder: 'ngx-deploy-npm:deploy',
+            options: {
+              access: 'public'
+            }
+          };
+        }
+      });
+  });
+
   describe('generating files', () => {
     let tree: Tree;
 
     beforeEach(() => {
       tree = Tree.empty();
-      tree.create('angular.json', JSON.stringify(generateAngularJson()));
+      tree.create('angular.json', JSON.stringify(originalAngularJSON));
     });
 
-    xit('generates new files if starting from scratch', async () => {
-      const result = ngAdd({
-        project: LIBRARY_NAME
-      })(tree, {});
-      expect(result.read('angular.json')!.toString()).toEqual(
-        initialAngularJson
-      );
-    });
+    it('should set the deployer on all libraries', () => {
+      const result = ngAdd()(tree);
 
-    xit('overrides existing files', async () => {
-      const tempTree = ngAdd({
-        project: LIBRARY_NAME
-      })(tree, {});
-      const result = ngAdd({
-        project: OTHER_LIBRARY_NAME
-      })(tempTree, {});
-      expect(result.read('angular.json')!.toString()).toEqual(
-        projectAngularJson
+      const angularJsonModified = JSON.parse(
+        result.read('angular.json')!.toString()
       );
+
+      expect(angularJsonModified).toEqual(expectedAngularJSON);
     });
   });
 
   describe('error handling', () => {
-    it('Should throw if angular.json not found', async () => {
-      expect(() =>
-        ngAdd({
-          project: LIBRARY_NAME
-        })(Tree.empty(), {})
-      ).toThrowError(/Could not find angular.json/);
+    it('Should throw if angular.json not found', () => {
+      expect(() => ngAdd()(Tree.empty())).toThrowError(
+        'Could not find angular.json'
+      );
     });
 
-    it('Should throw if angular.json can not be parsed', async () => {
+    it('Should throw if angular.json can not be parsed', () => {
       const tree = Tree.empty();
       tree.create('angular.json', 'hi');
-      expect(() =>
-        ngAdd({
-          project: LIBRARY_NAME
-        })(tree, {})
-      ).toThrowError(/Could not parse angular.json/);
+      expect(() => ngAdd()(tree)).toThrowError('Could not parse angular.json');
     });
 
-    xit('Should throw if specified library does not exist ', async () => {
-      const tree = Tree.empty();
-      tree.create('angular.json', JSON.stringify({ projects: {} }));
-      expect(() =>
-        ngAdd({
-          project: LIBRARY_NAME
-        })(tree, {})
-      ).toThrowError(
-        /No Angular project selected and no default project in the workspace/
+    it('Should throw if angular.json can not be parsed', () => {
+      expect(() => ngAdd()(Tree.empty())).toThrowError(
+        'Could not find angular.json'
       );
     });
 
-    xit('Should throw if specified project is not library', async () => {
-      const tree = Tree.empty();
-      tree.create(
+    it('should throw if there is no library to add the deployer', () => {
+      // Delete all libraries
+      Object.keys(originalAngularJSON.projects)
+        .filter(
+          projectKey =>
+            originalAngularJSON.projects[projectKey].projectType === 'library'
+        )
+        .forEach(libraryKey => {
+          delete originalAngularJSON.projects[libraryKey];
+        });
+      const treeWithoutLibs = Tree.empty();
+      treeWithoutLibs.create(
         'angular.json',
-        JSON.stringify({
-          projects: { [LIBRARY_NAME]: { projectType: 'pokemon' } }
-        })
+        JSON.stringify(originalAngularJSON)
       );
-      expect(() =>
-        ngAdd({
-          project: LIBRARY_NAME
-        })(tree, {})
-      ).toThrowError(
-        /No Angular project selected and no default project in the workspace/
+
+      expect(() => ngAdd()(treeWithoutLibs)).toThrowError(
+        'There is no libraries to add this deployer'
       );
     });
 
-    xit('Should throw if app does not have architect configured', async () => {
-      const tree = Tree.empty();
-      tree.create(
+    it('should throw if there is a library without architect', () => {
+      const publishable2 = originalAngularJSON.projects.publishable2;
+      const root = publishable2.root;
+      // Delete the architect
+      delete publishable2.architect;
+      const treeWithoutArchitect = Tree.empty();
+      treeWithoutArchitect.create(
         'angular.json',
-        JSON.stringify({
-          projects: { [LIBRARY_NAME]: { projectType: 'application' } }
-        })
+        JSON.stringify(originalAngularJSON)
       );
-      expect(() =>
-        ngAdd({
-          project: LIBRARY_NAME
-        })(tree, {})
-      ).toThrowError(
-        /No Angular project selected and no default project in the workspace/
+
+      expect(() => ngAdd()(treeWithoutArchitect)).toThrowError(
+        `The library ${root} doesn't have architect`
       );
     });
   });
 });
-
-function generateAngularJson() {
-  return {
-    defaultProject: LIBRARY_NAME,
-    projects: {
-      [LIBRARY_NAME]: {
-        projectType: 'application',
-        root: LIBRARY_ROOT,
-        architect: {
-          build: {
-            options: {
-              outputPath: 'dist/ikachu'
-            }
-          }
-        }
-      },
-      [OTHER_LIBRARY_NAME]: {
-        projectType: 'application',
-        root: LIBRARY_ROOT,
-        architect: {
-          build: {
-            options: {
-              outputPath: 'dist/ikachu'
-            }
-          }
-        }
-      }
-    }
-  };
-}
-
-const initialAngularJson = `{
-  \"defaultProject\": \"pie-ka-chu\",
-  \"projects\": {
-    \"pie-ka-chu\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        },
-        \"deploy\": {
-          \"builder\": \"ngx-deploy-npm:deploy\",
-          \"options\": {}
-        }
-      }
-    },
-    \"pi-catch-you\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        }
-      }
-    }
-  }
-}`;
-
-const overwriteAngularJson = `{
-  \"defaultProject\": \"pie-ka-chu\",
-  \"projects\": {
-    \"pie-ka-chu\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        },
-        \"deploy\": {
-          \"builder\": \"ngx-deploy-npm:deploy\",
-          \"options\": {}
-        }
-      }
-    },
-    \"pi-catch-you\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        }
-      }
-    }
-  }
-}`;
-
-const projectAngularJson = `{
-  \"defaultProject\": \"pie-ka-chu\",
-  \"projects\": {
-    \"pie-ka-chu\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        },
-        \"deploy\": {
-          \"builder\": \"ngx-deploy-npm:deploy\",
-          \"options\": {}
-        }
-      }
-    },
-    \"pi-catch-you\": {
-      \"projectType\": \"application\",
-      \"root\": \"pirojok\",
-      \"architect\": {
-        \"build\": {
-          \"options\": {
-            \"outputPath\": \"dist/ikachu\"
-          }
-        }
-      }
-    }
-  }
-}`;

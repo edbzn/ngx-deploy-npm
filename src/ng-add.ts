@@ -30,18 +30,9 @@ function getWorkspace(
     workspace
   };
 }
-interface NgAddOptions {
-  project?: string;
-}
 
-interface DeployOptions {
-  project: string;
-}
-
-export const ngAdd = ({ project: DeployOptions }) => (
-  tree: Tree,
-  options: NgAddOptions // TODO, specify which library set the deployer
-) => {
+// TODO, specify which library set the deployer
+export const ngAdd = () => (tree: Tree) => {
   const { path: workspacePath, workspace } = getWorkspace(tree);
 
   const libraries = getLibraries(workspace);
@@ -59,6 +50,10 @@ export const ngAdd = ({ project: DeployOptions }) => (
           access: npmAccess.public
         }
       };
+    } else {
+      throw new SchematicsException(
+        `The library ${lib.root} doesn't have architect`
+      );
     }
   });
 
