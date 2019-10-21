@@ -35,6 +35,7 @@ describe('ng-add', () => {
           prefix: 'myworkspace',
           architect: {
             build: {
+              builder: '@angular-devkit/build-ng-packagr:build',
               a: 'a',
               b: 'b'
             }
@@ -48,6 +49,7 @@ describe('ng-add', () => {
           prefix: 'myworkspace',
           architect: {
             build: {
+              builder: '@angular-devkit/build-ng-packagr:build',
               a: 'a',
               b: 'b'
             }
@@ -86,9 +88,11 @@ describe('ng-add', () => {
 
     expectedAngularJSON = JSON.parse(JSON.stringify(originalAngularJSON));
 
-    Object.keys(expectedAngularJSON.projects)
-      .map(projectKey => expectedAngularJSON.projects[projectKey])
-      .filter(project => project.projectType === 'library')
+    ['publishable', 'publishable2']
+      .map(
+        publishableProjectKey =>
+          expectedAngularJSON.projects[publishableProjectKey]
+      )
       .forEach(project => {
         if (project.architect) {
           project.architect.deploy = {
@@ -109,7 +113,7 @@ describe('ng-add', () => {
       tree.create('angular.json', JSON.stringify(originalAngularJSON));
     });
 
-    it('should set the deployer on all libraries', () => {
+    it('should set the deployer only on publishable libraries', () => {
       const result = ngAdd()(tree);
 
       const angularJsonModified = JSON.parse(
@@ -157,22 +161,6 @@ describe('ng-add', () => {
 
       expect(() => ngAdd()(treeWithoutLibs)).toThrowError(
         'There is no libraries to add this deployer'
-      );
-    });
-
-    it('should throw if there is a library without architect', () => {
-      const publishable2 = originalAngularJSON.projects.publishable2;
-      const root = publishable2.root;
-      // Delete the architect
-      delete publishable2.architect;
-      const treeWithoutArchitect = Tree.empty();
-      treeWithoutArchitect.create(
-        'angular.json',
-        JSON.stringify(originalAngularJSON)
-      );
-
-      expect(() => ngAdd()(treeWithoutArchitect)).toThrowError(
-        `The library ${root} doesn't have architect`
       );
     });
   });

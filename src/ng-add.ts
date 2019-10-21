@@ -3,6 +3,8 @@ import { experimental, JsonParseMode, parseJson } from '@angular-devkit/core';
 
 import { npmAccess } from './engine/defaults';
 
+const publishableLibBuilder = '@angular-devkit/build-ng-packagr:build';
+
 function getWorkspace(
   host: Tree
 ): { path: string; workspace: experimental.workspace.WorkspaceSchema } {
@@ -43,6 +45,7 @@ export const ngAdd = () => (tree: Tree) => {
   }
 
   libraries.forEach(lib => {
+    /* istanbul ignore else  */
     if (lib.architect) {
       lib.architect['deploy'] = {
         builder: 'ngx-deploy-npm:deploy',
@@ -50,10 +53,6 @@ export const ngAdd = () => (tree: Tree) => {
           access: npmAccess.public
         }
       };
-    } else {
-      throw new SchematicsException(
-        `The library ${lib.root} doesn't have architect`
-      );
     }
   });
 
@@ -62,14 +61,22 @@ export const ngAdd = () => (tree: Tree) => {
 };
 
 /**
- * TODO get only publishable libraries (nx case)
  * Get the libraries present in the workspace
  * @param workspace
  */
 function getLibraries({
   projects
 }: experimental.workspace.WorkspaceSchema): experimental.workspace.WorkspaceProject[] {
-  return Object.keys(projects)
-    .map(projectKey => projects[projectKey])
-    .filter(proj => proj.projectType === 'library');
+  return (
+    Object.keys(projects)
+      .map(projectKey => projects[projectKey])
+      // Check if the library is a publishable library (nx compatibility)
+      .filter(
+        proj =>
+          proj.projectType === 'library' &&
+          proj.architect &&
+          proj.architect.build &&
+          proj.architect.build.builder === publishableLibBuilder
+      )
+  );
 }

@@ -39,7 +39,7 @@ This command has the following prerequisites:
 
 This quick start assumes that you already an existing Angular project with a publishable package created and you already are logged in in npm using `npm login`
 
-1. Add `ngx-deploy-npm` to your project. It will configure all your libraries present in the project
+1. Add `ngx-deploy-npm` to your project. It will configure all your publishable libraries present in the project
 
    ```sh
    ng add ngx-deploy-npm
@@ -188,6 +188,34 @@ The licence and the readme must be in the root of the library. They are being co
 
 This deployer do not bumps or creates a new version of the package, it just build the **package/library**, take the package.json as it and **publish** it.
 
+### Only publishable libraries are being configured
+
+A publishable library is one that can be built. Here we detect that if the library in the `angular.json` has the architect **build** with the builder `@angular-devkit/build-ng-packagr:build`.
+
+The `angular.json` look like
+
+```json
+{
+  "publishable-library": {
+    "projectType": "library",
+    "root": "libs/publishable-library",
+    "sourceRoot": "libs/publishable-library/src",
+    "prefix": "myworkspace",
+    "architect": {
+      "build": {
+        "builder": "@angular-devkit/build-ng-packagr:build",
+        "options": {
+          "tsConfig": "libs/publishable-library/tsconfig.lib.json",
+          "project": "libs/publishable-library/ng-package.json"
+        }
+      }
+    }
+  }
+}
+```
+
+This take special context in [NX](https://nx.dev) environment.
+
 **You must take care about the version by yourself. Maybe using a script that sets the version**
 
 ## 🏁 Next milestones <a name="next-milestones"></a>
@@ -199,8 +227,6 @@ We are looking forward to the following features:
   - Inspection
   - Delivery
 - Specify which library add the deployer on the `ng add`
-- Compatibility with [Nx](https://nx.dev)
-- Continuous Delivery Documentation
 - Add all the RFC proposals of [ngx-deploy-starter](https://github.com/angular-schule/ngx-deploy-starter)
 - ChangeLog Compatibility
 - Custom Readme and Licence Paths
