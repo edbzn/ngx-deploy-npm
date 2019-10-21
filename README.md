@@ -180,9 +180,13 @@ And just run `ng deploy` 😄.
 
 ## 🧐 Essential considerations <a name="essential-considerations"></a>
 
-### Readme and Licence
+### README, LICENCE and CHANGELOG
 
-The licence and the readme must be in the root of the library. They are being copied at the moment of deployment
+Those files must be in the root of the library. They are being copied by the builder at the moment of deployment.
+
+If you have those files outside the project's root, you can create a symbolic link to solve that problem.
+
+> See [symbolic links on git](https://www.mokacoding.com/blog/symliks-in-git/) to know how to create them properly.
 
 ### Version bumping
 
@@ -228,8 +232,7 @@ We are looking forward to the following features:
   - Delivery
 - Specify which library add the deployer on the `ng add`
 - Add all the RFC proposals of [ngx-deploy-starter](https://github.com/angular-schule/ngx-deploy-starter)
-- ChangeLog Compatibility
-- Custom Readme and Licence Paths
+- Custom README, LICENCE and CHANGELOG paths
 
 Your feature that's not on the list yet?
 
