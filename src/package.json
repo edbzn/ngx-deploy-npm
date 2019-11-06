@@ -11,6 +11,9 @@
   },
   "schematics": "./collection.json",
   "builders": "./builders.json",
+  "ng-add": {
+    "save": "devDependencies"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bikecoders/ngx-deploy-npm.git"
