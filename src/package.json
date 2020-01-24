@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && json2ts deploy/schema.json > deploy/schema.d.ts && tsc && copyfiles README.md builders.json collection.json package.json ngx-deploy-npm deploy/schema.json dist",
+    "link": "npm run build && cd dist && npm link && cd ..",
     "test": "jest",
     "test:debug": "node --inspect-brk=0.0.0.0 node_modules/.bin/jest --runInBand",
     "release": "standard-version"

@@ -5,129 +5,228 @@ import * as engine from './engine';
 import { Schema } from '../deploy/schema';
 import { npmAccess } from './defaults';
 
-jest.mock('./utils/exec-async');
-import * as execAsync from './utils/exec-async';
+import * as exec from './utils/exec-async';
+
+import * as fs from './utils/fs-async';
+import { PromiseWithChild } from 'child_process';
 
 describe('engine', () => {
-  describe('getOptionsString', () => {
-    let options: Object;
-    let expectedCmdStringOptions: string;
+  let dir: string;
+  let options: Schema;
 
-    beforeEach(() => {
-      options = {
-        justAnExample: 'example',
-        anotherExample: 'example',
-        hello: 'hallo',
-        justAnUndefined: undefined
-      };
-
-      expectedCmdStringOptions =
-        '--just-an-example example --another-example example --hello hallo';
-    });
-
-    it('should transform the camelCase options to CMD options', () => {
-      const transformedOptions = engine.getOptionsString(options);
-
-      expect(transformedOptions).toEqual(expectedCmdStringOptions);
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  describe('prepareOptions', () => {
-    let options: Schema;
-    let expectedOptions: Schema;
-
-    it('should overwrite the default option dry-run', () => {
-      const options = {
-        otp: 'random-text',
-        dryRun: true,
-        tag: 'random-tag'
-      };
-      const expectedOptions = {
-        otp: 'random-text',
-        dryRun: true,
-        tag: 'random-tag',
-        access: npmAccess.public
-      };
-
-      const processedOptions = engine.prepareOptions(options, logging);
-
-      expect(processedOptions).toEqual(expectedOptions);
-    });
-
-    it('should overwrite the default option dry-run and access', () => {
-      const options = {
-        otp: 'random-text',
-        dryRun: true,
-        tag: 'random-tag',
-        access: npmAccess.restricted
-      };
-      const expectedOptions = {
-        otp: 'random-text',
-        dryRun: true,
-        tag: 'random-tag',
-        access: npmAccess.restricted
-      };
-
-      const processedOptions = engine.prepareOptions(options, logging);
-
-      expect(processedOptions).toEqual(expectedOptions);
-    });
+  // Spies
+  beforeEach(() => {
+    jest.spyOn(exec, 'execAsync').mockImplementation(
+      () =>
+        Promise.resolve({
+          stdout: 'package published',
+          stderr: undefined
+        }) as PromiseWithChild<any>
+    );
   });
 
-  describe('run', () => {
-    let customOptions: Object;
-    let customOptionsCMD: string;
-    let dir: string;
+  // Data
+  beforeEach(() => {
+    dir = 'customDir';
+  });
 
-    //Spyes
-    let prepareOptionsSpy: jest.SpyInstance;
-    let getOptionsStringSpy: jest.SpyInstance;
+  it('should call NPM Publish with the right options', done => {
+    options = {
+      access: npmAccess.restricted,
+      tag: 'next',
+      otp: 'someValue',
+      configuration: 'stageConfig',
+      dryRun: true
+    };
+    const optionsOnCMD = `--access ${options.access} --tag ${options.tag} --otp ${options.otp} --dry-run ${options.dryRun}`;
 
-    beforeEach(() => {
-      customOptions = {
-        customOptions: 'random'
-      };
-      customOptionsCMD = '--custom-options random';
-      dir = 'customDir';
+    engine
+      .run(dir, options, logging)
+      .then(() => {
+        expect(exec.execAsync).toHaveBeenCalledWith(
+          `npm publish ${dir} ${optionsOnCMD}`
+        );
+        done();
+      })
+      .catch(err => fail('should be completed' + err));
+  });
 
-      prepareOptionsSpy = jest
-        .spyOn(engine, 'getOptionsString')
-        .mockReturnValue('');
-      getOptionsStringSpy = jest
-        .spyOn(engine, 'getOptionsString')
-        .mockReturnValue(customOptionsCMD);
-    });
+  it('should indicate that an error occurred when there is an error publishing the package', done => {
+    const customErr = 'custom err';
+    jest
+      .spyOn(exec, 'execAsync')
+      .mockImplementation(
+        () => Promise.reject(customErr) as PromiseWithChild<any>
+      );
 
-    afterEach(function() {
-      jest.clearAllMocks();
-    });
+    engine
+      .run(dir, options, logging)
+      .then(() => fail('should enter in the catch section'))
+      .catch(err => {
+        expect(customErr).toEqual(err);
+        done();
+      });
+  });
 
-    it('should execute the command correctly', (done: () => void) => {
+  describe('Options Management', () => {
+    it('should set the default options', done => {
+      const options: Schema = {};
+      const optionsOnCMD = `--access public`;
+
       engine
-        .run(dir, customOptions, logging)
+        .run(dir, options, logging)
         .then(() => {
-          expect(execAsync.default).toHaveBeenCalledWith(
-            `npm publish ${dir} ${customOptionsCMD}`
+          expect(exec.execAsync).toHaveBeenCalledWith(
+            `npm publish ${dir} ${optionsOnCMD}`
           );
           done();
         })
         .catch(err => fail('should be completed' + err));
-
-      (execAsync as any).resolve('npm output');
     });
 
-    it('should throw an error if the command fail', (done: () => void) => {
-      const customErr = 'custom err';
+    it('should overwrite the default option dry-run', done => {
+      const options: Schema = {
+        otp: 'random-text',
+        dryRun: true,
+        tag: 'random-tag'
+      };
+      const optionsOnCMD = `--access public --tag ${options.tag} --otp ${options.otp} --dry-run true`;
 
       engine
-        .run(dir, customOptions, logging)
-        .then(() => fail('should enter in the catch section'))
-        .catch(err => {
-          expect(customErr).toEqual(err);
+        .run(dir, options, logging)
+        .then(() => {
+          expect(exec.execAsync).toHaveBeenCalledWith(
+            `npm publish ${dir} ${optionsOnCMD}`
+          );
           done();
-        });
+        })
+        .catch(err => fail('should be completed' + err));
+    });
 
-      (execAsync as any).reject(customErr);
+    it('should overwrite the default option dry-run and access', done => {
+      const options = {
+        dryRun: true,
+        tag: 'random-tag',
+        access: npmAccess.restricted
+      };
+      const optionsOnCMD = `--access ${npmAccess.restricted} --tag ${options.tag} --dry-run true`;
+
+      engine
+        .run(dir, options, logging)
+        .then(() => {
+          expect(exec.execAsync).toHaveBeenCalledWith(
+            `npm publish ${dir} ${optionsOnCMD}`
+          );
+          done();
+        })
+        .catch(err => fail('should be completed' + err));
+    });
+  });
+
+  describe('Package.json Feature', () => {
+    let myPackageJSON: object;
+    let expectedPackage: object;
+    let version: string;
+    let options: Schema;
+
+    // Spies
+    beforeEach(() => {
+      jest
+        .spyOn(fs, 'readFileAsync')
+        .mockImplementation(() =>
+          Promise.resolve(JSON.stringify(myPackageJSON))
+        );
+
+      jest
+        .spyOn(fs, 'writeFileAsync')
+        .mockImplementation(() => Promise.resolve());
+    });
+
+    // Data
+    beforeEach(() => {
+      version = '1.0.1-next0';
+
+      myPackageJSON = {
+        name: 'ngx-deploy-npm',
+        version: 'boilerPlate',
+        description:
+          'Publish your angular packages to npm by just run `npm deploy your-packages`',
+        main: 'index.js'
+      };
+
+      expectedPackage = {
+        ...myPackageJSON,
+        version
+      };
+
+      options = {
+        packageVersion: version
+      };
+    });
+
+    it('should write the version of the sent on the package.json', done => {
+      engine
+        .run(dir, options, logging)
+        .then(() => {
+          expect(fs.writeFileAsync).toHaveBeenCalledWith(
+            `${dir}/package.json`,
+            JSON.stringify(expectedPackage, null, 4),
+            { encoding: 'utf8' }
+          );
+          done();
+        })
+        .catch(err => fail('should be completed' + err));
+    });
+
+    it('should not write the version of the sent on the package.json if is on dry-run mode', done => {
+      options.dryRun = true;
+      engine
+        .run(dir, options, logging)
+        .then(() => {
+          expect(fs.writeFileAsync).not.toHaveBeenCalled();
+          done();
+        })
+        .catch(err => fail('should be completed' + err));
+    });
+
+    describe('Errors', () => {
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should throw an error if there is an error reading the package.json', done => {
+        const customErr = 'custom err';
+        jest
+          .spyOn(fs, 'readFileAsync')
+          .mockImplementation(() => Promise.reject(customErr));
+
+        engine
+          .run(dir, options, logging)
+          .then(() => fail('should enter in the catch section'))
+          .catch(err => {
+            expect(customErr).toEqual(err);
+            done();
+          });
+      });
+
+      it('should throw an error if there is an error writing the package.json', done => {
+        const customErr = 'custom err';
+        jest
+          .spyOn(fs, 'writeFileAsync')
+          .mockImplementation(() => Promise.reject(customErr));
+
+        engine
+          .run(dir, options, logging)
+          .then(() => fail('should enter in the catch section'))
+          .catch(err => {
+            expect(customErr).toEqual(err);
+            done();
+          });
+      });
     });
   });
 });

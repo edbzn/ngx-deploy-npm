@@ -17,6 +17,7 @@
   - [CircleCI](#circleci)
 - [📦 Options](#options)
   - [--configuration](#--configuration)
+  - [--package-version](#--package-version)
   - [--tag](#--tag)
   - [--access](#--access)
   - [--otp](#--otp)
@@ -37,7 +38,7 @@ This command has the following prerequisites:
 
 ## 🚀 Quick Start (local development) <a name="quick-start"></a>
 
-This quick start assumes that you already an existing Angular project with a publishable package created and you already are logged in in npm using `npm login`
+This quick start assumes that you already have an existing Angular project with a publishable package created and you already are logged in on npm using `npm login`
 
 1. Add `ngx-deploy-npm` to your project. It will configure all your publishable libraries present in the project
 
@@ -72,8 +73,8 @@ Independently of the CI/CD that you are using you must create an NPM token. To d
    - The output should be the username of your npm account
 4. **Deploy your package**
    - Create a step with `run: npx ng deploy YOUR_LIBRARY`
-   - **NOTE:** You may want to execute an script that execute some pre steps before publishing and inside that script execute `ng deploy YOUR_LIBRARY`. If you want to make that script on JavaScript and put it on the package.json, **execute it using `npm` not with yarn**, there is an [issue](https://github.com/yarnpkg/yarn/issues/5683) associated with that
-5. Enjoy your just released package 🎉📦
+   - **NOTE:** You may want to execute a script that executes some pre-steps before publishing and inside that script execute `ng deploy YOUR_LIBRARY`. If you want to make that script on JavaScript and put it on the package.json, **execute it using `npm` not with yarn**, there is an [issue](https://github.com/yarnpkg/yarn/issues/5683) associated with that
+5. **Enjoy your just released package 🎉📦**
 
 The job full example is
 
@@ -108,6 +109,15 @@ A named build target, as specified in the `configurations` section of `angular.j
 Each named target is accompanied by a configuration of option defaults for that target.
 Same as `ng build --configuration=XXX`.
 
+#### --package-version
+
+- **optional**
+- Default: Doesn't have any default value [string]
+- Example:
+  - `ng deploy --package-version 2.3.4`
+
+It's going to put that version on your `package.json` and publish the library with that version on NPM.
+
 #### --tag
 
 - **optional**
@@ -123,12 +133,12 @@ Registers the published package with the given tag, such that `npm install @` wi
 - Example:
   - `ng deploy --access public`
 
-Tells the registry whether this package should be published as public or restricted. Only applies to scoped packages, which default to restricted. If you don’t have a paid account, you must publish with --access public to publish scoped packages.
+Tells the registry whether this package should be published as public or restricted. It only applies to scoped packages, which default to restricted. If you don’t have a paid account, you must publish with --access public to publish scoped packages.
 
 #### --otp
 
 - **optional**
-- Default: `public` (string)
+- Default: Doesn't have any default value (string)
 - Example:
   - `ng deploy --otp TOKEN`
 
@@ -150,6 +160,7 @@ To avoid all these command-line cmd options, you can write down your configurati
 - access
 - configuration
 - dryRun
+- packageVersion
 - otp
 - tag
 
@@ -180,7 +191,7 @@ And just run `ng deploy` 😄.
 
 ## 🧐 Essential considerations <a name="essential-considerations"></a>
 
-### README, LICENCE and CHANGELOG
+### README, LICENCE, and CHANGELOG
 
 Those files must be in the root of the library. They are being copied by the builder at the moment of deployment.
 
@@ -190,7 +201,7 @@ If you have those files outside the project's root, you can create a symbolic li
 
 ### Version bumping
 
-This deployer do not bumps or creates a new version of the package, it just build the **package/library**, take the package.json as it and **publish** it.
+This deployer doesn't bump or generates a new version of the package, it just builds the **package/library**, take the package.json as it and **publish** it. You can use [`--package-version`](#--package-version) option to change it.
 
 ### Only publishable libraries are being configured
 
@@ -218,9 +229,7 @@ The `angular.json` look like
 }
 ```
 
-This take special context in [NX](https://nx.dev) environment.
-
-**You must take care about the version by yourself. Maybe using a script that sets the version**
+This takes a special context on a [NX](https://nx.dev) environment.
 
 ## 🏁 Next milestones <a name="next-milestones"></a>
 
@@ -232,7 +241,7 @@ We are looking forward to the following features:
   - Delivery
 - Specify which library add the deployer on the `ng add`
 - Add all the RFC proposals of [ngx-deploy-starter](https://github.com/angular-schule/ngx-deploy-starter)
-- Custom README, LICENCE and CHANGELOG paths
+- Custom README, LICENCE, and CHANGELOG paths
 
 Your feature that's not on the list yet?
 

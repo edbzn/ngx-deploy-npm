@@ -1,7 +1,7 @@
 {
   "id": "Schema",
   "title": "schema",
-  "description": "Deployment/Publishment of Angular CLI applications to NPM",
+  "description": "Publish your angular packages to npm by just run `npm deploy your-packages`",
   "properties": {
     "configuration": {
       "type": "string",
@@ -14,7 +14,7 @@
     },
     "packageVersion": {
       "type": "string",
-      "description": "the version string of the publishing package"
+      "description": "The version that your package is going to be published. Ex: '1.3.5' '2.0.0-next.0'"
     },
     "tag": {
       "type": "string",
