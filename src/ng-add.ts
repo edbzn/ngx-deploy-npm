@@ -74,8 +74,12 @@ function getLibraries({ projects }: Workspace): WorkspaceProject[] {
   return (
     Object.keys(projects)
       .map(projectKey => projects[projectKey])
-      // Check if the library is a publishable library (nx compatibility)
-      .filter(proj => proj.projectType === 'library' && proj.architect?.build)
+      // Check if the library is a buildable library (nx compatibility)
+      .filter(
+        proj =>
+          proj.projectType === 'library' &&
+          (proj?.architect?.build ?? proj?.targets?.build)
+      )
   );
 }
 
