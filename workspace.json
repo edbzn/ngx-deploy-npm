@@ -61,6 +61,13 @@
           "options": {
             "access": "public"
           }
+        },
+        "version": {
+          "executor": "@jscutlery/semver:version",
+          "options": {
+            "versionTagPrefix": "v",
+            "baseBranch": "master"
+          }
         }
       },
       "tags": []
