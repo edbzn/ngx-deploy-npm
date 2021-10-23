@@ -88,5 +88,6 @@
       "tags": [],
       "implicitDependencies": ["ngx-deploy-npm"]
     }
-  }
+  },
+  "defaultProject": "ngx-deploy-npm"
 }
